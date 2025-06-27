@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <title>Поиск товаров</title>
+</head>
+<body>
+    <header style="margin-bottom: 20px;">
+        <a href="/dashboard" class="dashboard-link">← Dashboard</a>
+    </header>
+
+    <h1>Поиск товаров</h1>
+    <form method="get" class="filter-form">
+        <div class="form-row">
+            {{ form.query }}
+        </div>
+        <div class="form-row">
+            {{ form.min_price }}
+            {{ form.max_discount_price }}
+            {{ form.min_rating }}
+        </div>
+        <div class="form-row">
+            {{ form.min_discount_price }}
+            {{ form.max_discount_price }}
+            {{ form.min_feedbacks }}
+        </div>
+        <button type="submit">Искать</button>
+    </form>
+
+    {% if products %}
+        <hr>
+        <form method="post" id="product-form">
+            {% csrf_token %}
+            <button type="submit" class="submit-btn">Добавить товары</button>
+        </form>
+        <br>
+
+        {% for product in products %}
+            <div class="product-card">
+                <strong>{{ product.name }}</strong>
+                <div class="product-info">
+                    <span>{{ product.price_basic_rub }}₽</span> |
+                    <span>{{ product.price_total_rub }}₽</span> |
+                    <span>★ {{ product.rating }}</span> |
+                    <span>{{ product.feedbacks }} отзывов</span>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

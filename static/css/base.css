@@ -1,0 +1,40 @@
+body {
+    font-family: sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dashboard-link {
+    text-decoration: none;
+    color: #007acc;
+    font-weight: bold;
+}
+
+.filter-form .form-row {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.product-card {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+.product-card strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.product-info {
+    font-size: 0.9em;
+    color: #333;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
