@@ -59,3 +59,6 @@ def search_view(request):
 
         messages.success(request, f"Добавлено {added} новых товаров.")
         return redirect("search_view")
+
+def dashboard(request):
+    return render(request, "wb_parser/dashboard.html") 

@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Товары</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+  <header style="margin-bottom: 20px;">
+        <a href="{% url 'search_view' %}" class="dashboard-link">← Parser</a>
+  </header>
+  <h1>Товары</h1>
+
+  <div class="range-container">
+    <label>Цена от: <input type="range" id="priceMin" min="0" max="10000" value="0">
+      <span id="priceMinValue">0</span>
+    </label>
+    <label>до: <input type="range" id="priceMax" min="0" max="10000" value="10000">
+      <span id="priceMaxValue">10000</span>
+    </label>
+  </div>
+
+  <label>Минимальный рейтинг: <input type="number" id="minRating" step="0.1" value="0"></label>
+  <label>Мин. отзывов: <input type="number" id="minFeedbacks" value="0"></label>
+
+  <table id="productTable">
+    <thead>
+      <tr>
+        <th data-sort="name">Название</th>
+        <th data-sort="price_basic_rub">Базовая цена (₽)</th>
+        <th data-sort="price_total_rub">Цена со скидкой (₽)</th>
+        <th data-sort="rating">Рейтинг</th>
+        <th data-sort="feedbacks">Отзывы</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Гистограмма цен</h2>
+  <canvas id="priceHistogram" width="600" height="300"></canvas>
+
+  <h2>Скидка против рейтинга</h2>
+  <canvas id="discountChart" width="600" height="300"></canvas>
+
+  <script>
+    const API_URL = '/api/products/';
+
+    const tableBody = document.querySelector('#productTable tbody');
+    const priceMin = document.getElementById('priceMin');
+    const priceMax = document.getElementById('priceMax');
+    const priceMinValue = document.getElementById('priceMinValue');
+    const priceMaxValue = document.getElementById('priceMaxValue');
+    const minRating = document.getElementById('minRating');
+    const minFeedbacks = document.getElementById('minFeedbacks');
+
+    const tableHeaders = document.querySelectorAll('th[data-sort]');
+    let currentOrdering = '';
+
+    let priceChart, discountChart;
+
+    function getParams() {
+      const min = priceMin.value;
+      const max = priceMax.value;
+      const rating = minRating.value;
+      const feedbacks = minFeedbacks.value;
+      let params = `?price_total_rub_min=${min}&price_total_rub_max=${max}`;
+      if (rating) params += `&rating_min=${rating}`;
+      if (feedbacks) params += `&feedbacks_min=${feedbacks}`;
+      if (currentOrdering) params += `&ordering=${currentOrdering}`;
+      return params;
+    }
+
+    function updateTable(data) {
+      tableBody.innerHTML = '';
+      data.forEach(item => {
+        const discount = item.price_basic_rub > 0 ?
+          Math.round((item.price_basic_rub - item.price_total_rub) / item.price_basic_rub * 100 * 100) / 100 : 0;
+        const row = `<tr>
+          <td>${item.name}</td>
+          <td>${item.price_basic_rub}</td>
+          <td>${item.price_total_rub}</td>
+          <td>${item.rating}</td>
+          <td>${item.feedbacks}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    function updateHistogram(data) {
+      const bins = {};
+      data.forEach(p => {
+        const rounded = Math.floor(p.price_total_rub / 500) * 500;
+        bins[rounded] = (bins[rounded] || 0) + 1;
+      });
+      const labels = Object.keys(bins);
+      const counts = Object.values(bins);
+
+      if (priceChart) priceChart.destroy();
+      priceChart = new Chart(document.getElementById('priceHistogram'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{ label: 'Кол-во товаров', data: counts }]
+        },
+        options: { scales: { x: { title: { display: true, text: 'Цена (₽)' } } } }
+      });
+    }
+
+    function updateDiscountChart(data) {
+      const ratings = [], discounts = [];
+      data.forEach(p => {
+        if (p.price_basic_rub > 0) {
+          ratings.push(p.rating);
+          const discount = Math.round((p.price_basic_rub - p.price_total_rub) / p.price_basic_rub * 100 * 100) / 100;
+          discounts.push(discount);
+        }
+      });
+
+      if (discountChart) discountChart.destroy();
+      discountChart = new Chart(document.getElementById('discountChart'), {
+        type: 'line',
+        data: {
+          labels: ratings,
+          datasets: [{ label: 'Скидка (%)', data: discounts, fill: false, borderColor: 'red' }]
+        },
+        options: {
+          scales: {
+            x: { title: { display: true, text: 'Рейтинг' } },
+            y: { title: { display: true, text: 'Скидка (%)' } }
+          }
+        }
+      });
+    }
+
+    async function fetchData() {
+      const response = await fetch(API_URL + getParams());
+      const data = await response.json();
+      updateTable(data);
+      updateHistogram(data);
+      updateDiscountChart(data);
+    }
+
+    [priceMin, priceMax, minRating, minFeedbacks].forEach(el => {
+      el.addEventListener('input', () => {
+        priceMinValue.textContent = priceMin.value;
+        priceMaxValue.textContent = priceMax.value;
+        fetchData();
+      });
+    });
+
+    tableHeaders.forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.dataset.sort;
+        if (currentOrdering === field) {
+          currentOrdering = '-' + field;
+        } else if (currentOrdering === '-' + field) {
+          currentOrdering = '';
+        } else {
+          currentOrdering = field;
+        }
+        fetchData();
+      });
+    });
+
+    window.onload = () => {
+      fetchData();
+    };
+  </script>
+</body>
+</html>

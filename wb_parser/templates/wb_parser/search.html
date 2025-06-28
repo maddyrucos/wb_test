@@ -7,7 +7,7 @@
 </head>
 <body>
     <header style="margin-bottom: 20px;">
-        <a href="/dashboard" class="dashboard-link">← Dashboard</a>
+        <a href="{% url 'dashboard' %}" class="dashboard-link">← Dashboard</a>
     </header>
 
     <h1>Поиск товаров</h1>
@@ -17,11 +17,11 @@
         </div>
         <div class="form-row">
             {{ form.min_price }}
-            {{ form.max_discount_price }}
+            {{ form.min_discount_price }}
             {{ form.min_rating }}
         </div>
         <div class="form-row">
-            {{ form.min_discount_price }}
+            {{ form.max_price }}
             {{ form.max_discount_price }}
             {{ form.min_feedbacks }}
         </div>

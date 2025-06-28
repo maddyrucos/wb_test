@@ -9,11 +9,13 @@ class Product(models.Model):
     price_total_rub = models.FloatField()
     rating = models.FloatField()
     feedbacks = models.IntegerField()
-
+    
+    @property
     def discount_percent(self):
-        if self.price == 0:
+        if self.price_basic == 0:
             return 0
-        return round((self.price_basic - self.price_total) / self.price * 100, 2)
+        return round((self.price_basic - self.price_total) / self.price_basic * 100, 2)
+
 
     def __str__(self):
         return self.name
