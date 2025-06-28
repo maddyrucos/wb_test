@@ -25,20 +25,7 @@
 #### 2. API
 
 * Эндпоинт: `GET /api/products/`
-* Поддерживает фильтры:
-
-    * 'nm_id', 'name',
-    * 'price_basic_min', 'price_basic_max',
-    * 'price_basic_rub_min', 'price_basic_rub_max',
-    * 'price_total_min', 'price_total_max',
-    * 'price_total_rub_min', 'price_total_rub_max',
-    * 'rating_min', 'rating_max',
-    * 'feedbacks_min', 'feedbacks_max',
-* Пример:
-
-  ```
-  /api/products/?min_price=5000&min_rating=4
-  ```
+<a href="https://github.com/maddyrucos/wb_test/blob/master/api/README.md">Документация к API</a>
 
 ### 🖥️ Frontend (HTML + JS)
 
@@ -94,6 +81,6 @@ python manage.py runserver
 
 ## 📎 Примечания
 
-* Для запуска парсера необходимо ввести категорию или поисковый запрос. (Подробнее — см. документацию модуля парсинга) https://github.com/maddyrucos/wb_test/wb_parser/services/wb_pasrser.py
+* <a href="https://github.com/maddyrucos/wb_test/blob/master/wb_parser/services/wb_parser.py">Парсер</a>
 * Все визуализации автоматически обновляются при изменении фильтров.
 * API протестировано и покрыто unit-тестами.
