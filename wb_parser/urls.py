@@ -5,7 +5,7 @@ from . import views
 
 urlpatterns = [
     path("", views.search_view, name="search_view"),
-    path("dashboard", views.dashboard, name="dashboard")
+    path("dashboard/", views.dashboard, name="dashboard")
 ]
 
 if settings.DEBUG:
