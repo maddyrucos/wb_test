@@ -8,10 +8,10 @@ from .services.wb_parser import search_wb_products
 
 def search_view(request):
     form = ProductSearchForm(request.GET or None)
-    
+    messages = []
+
     if request.method == "GET":
         products = []
-        messages = []
         if form.is_valid() and form.cleaned_data.get("query"):
             params = {k: v for k, v in form.cleaned_data.items() if v is not None}
             products = search_wb_products(**params)
@@ -57,8 +57,13 @@ def search_view(request):
             if created:
                 added += 1
 
-        messages.success(request, f"Добавлено {added} новых товаров.")
-        return redirect("search_view")
+        products = []
+        messages.append(f"Добавлено {added} новых товаров.")
+        return render(request, "wb_parser/search.html", {
+            "form": form,
+            "products": products,
+            "messages": messages
+        })
 
 def dashboard(request):
     return render(request, "wb_parser/dashboard.html") 
